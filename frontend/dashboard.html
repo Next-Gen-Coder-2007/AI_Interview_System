@@ -1,0 +1,727 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block styles %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary-color: #1e40af;
+            --accent-color: #3b82f6;
+            --text-color: #1f2937;
+            --text-light: #6b7280;
+            --background: #f9fafb;
+            --white: #ffffff;
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            width: 100%;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--white);
+            color: var(--text-color);
+            padding: 1rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            font-size: 1.8rem;
+        }
+
+        .menu-toggle {
+            display: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+        }
+
+        /* Profile Dropdown */
+        .profile-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .profile-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            border: 2px solid transparent;
+            transition: var(--transition);
+        }
+
+        .profile-icon:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: var(--white);
+            min-width: 220px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border-radius: 0.5rem;
+            z-index: 1;
+            overflow: hidden;
+            margin-top: 0.5rem;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: var(--transition);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .dropdown-content.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .dropdown-content a {
+            color: var(--text-color);
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            transition: var(--transition);
+            font-size: 0.95rem;
+        }
+
+        .dropdown-content a i {
+            margin-right: 0.75rem;
+            width: 18px;
+            text-align: center;
+        }
+
+        .dropdown-content a:hover {
+            background-color: rgba(37, 99, 235, 0.1);
+            color: var(--primary-color);
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background-color: rgba(0, 0, 0, 0.05);
+            margin: 0.5rem 0;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            width: 260px;
+            height: calc(100vh - 70px);
+            background-color: var(--white);
+            padding: 1.5rem 0;
+            box-shadow: var(--shadow);
+            z-index: 999;
+            transition: var(--transition);
+            overflow-y: auto;
+            border-right: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .sidebar-nav {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-nav li a {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            color: var(--text-light);
+            text-decoration: none;
+            transition: var(--transition);
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .sidebar-nav li a:hover {
+            color: var(--primary-color);
+            background-color: rgba(37, 99, 235, 0.05);
+        }
+
+        .sidebar-nav li a.active {
+            color: var(--primary-color);
+            background-color: rgba(37, 99, 235, 0.1);
+            border-left: 3px solid var(--primary-color);
+        }
+
+        .sidebar-nav li a i {
+            margin-right: 0.75rem;
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-header {
+            padding: 0 1.5rem 1rem 1.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .sidebar-header h3 {
+            font-size: 1rem;
+            color: var(--text-light);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 260px;
+            margin-top: 70px;
+            padding: 2rem;
+            flex: 1;
+            transition: var(--transition);
+        }
+
+        /* Dashboard Header */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .dashboard-header .btn {
+            background-color: var(--primary-color);
+            color: var(--white);
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .dashboard-header .btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        /* Dashboard Cards */
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .card {
+            background-color: var(--white);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            height: 100%;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.2rem;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-light);
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(37, 99, 235, 0.1);
+            color: var(--primary-color);
+        }
+
+        .card-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .card-change {
+            display: flex;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+
+        .card-change-positive {
+            color: #10b981;
+        }
+
+        .card-change-negative {
+            color: #ef4444;
+        }
+
+        .card-change i {
+            font-size: 0.9rem;
+            margin-right: 0.25rem;
+        }
+
+        /* Recent Interviews */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.2rem;
+        }
+
+        .section-header h2 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .interviews-table {
+            width: 100%;
+            background-color: var(--white);
+            border-radius: 0.75rem;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .interviews-table th, .interviews-table td {
+            padding: 1rem 1.2rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .interviews-table th {
+            background-color: var(--background);
+            font-weight: 600;
+            color: var(--text-light);
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+            padding-top: 1.1rem;
+            padding-bottom: 1.1rem;
+        }
+
+        .interviews-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .interviews-table tr:hover {
+            background-color: rgba(37, 99, 235, 0.03);
+        }
+
+        .status-badge {
+            padding: 0.3rem 0.6rem;
+            border-radius: 0.75rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-align: center;
+            width: 90px;
+        }
+
+        .status-completed {
+            color: #059669;
+            background-color: rgba(5, 150, 105, 0.1);
+        }
+
+        .status-pending {
+            color: #d97706;
+            background-color: rgba(217, 119, 6, 0.1);
+        }
+
+        .status-scheduled {
+            color: #0369a1;
+            background-color: rgba(3, 105, 161, 0.1);
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            transition: var(--transition);
+            border: 1px solid transparent;
+            text-decoration: none;
+            text-align: center;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary-color);
+            border-color: rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(37, 99, 235, 0.05);
+            border-color: rgba(37, 99, 235, 0.5);
+        }
+
+        .btn-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.25rem;
+            background-color: rgba(37, 99, 235, 0.1);
+            color: var(--primary-color);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .dashboard-cards {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 220px;
+            }
+
+            .main-content {
+                margin-left: 220px;
+            }
+
+            .dashboard-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .menu-toggle {
+                display: block;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+                position: fixed;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1.5rem;
+            }
+
+            .container {
+                padding: 0 10px;
+            }
+
+            .dashboard-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .interviews-table th, .interviews-table td {
+                padding: 0.7rem 0.9rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <header>
+        <div class="container">
+            <nav>
+                <div style="display: flex; align-items: center; gap: 1.5rem;">
+                    <div class="menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </div>
+                    <a href="/" class="logo">
+                        <i class="fas fa-robot logo-icon"></i>
+                        <span>AI Interview Pro</span>
+                    </a>
+                </div>
+                <div class="profile-dropdown">
+                    <div class="profile-icon" id="profileIcon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="dropdown-content" id="dropdownContent">
+                        <div style="padding: 0.75rem 1rem 0.5rem 1rem; border-bottom: 1px solid rgba(0, 0, 0, 0.05);">
+                            <div style="font-size: 0.9rem; font-weight: 500; color: var(--text-color); margin-bottom: 0.2rem;">{{ user.username }}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-light);">{{ user.email }}</div>
+                        </div>
+                        <a href="/profile"><i class="fas fa-user-circle"></i> Profile</a>
+                        <a href="/interviews"><i class="fas fa-video"></i> My Interviews</a>
+                        <a href="/settings"><i class="fas fa-cog"></i> Settings</a>
+                        <div class="dropdown-divider"></div>
+                        <a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>Main Menu</h3>
+        </div>
+        <ul class="sidebar-nav">
+            <li><a href="/dashboard" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
+            <li><a href="/interviews"><i class="fas fa-video"></i> Interviews</a></li>
+            <li><a href="/practice"><i class="fas fa-laptop-code"></i> Practice</a></li>
+            <li><a href="/analytics"><i class="fas fa-chart-bar"></i> Analytics</a></li>
+            <li><a href="/resources"><i class="fas fa-book"></i> Resources</a></li>
+        </ul>
+        <div class="sidebar-header" style="margin-top: 1.5rem;">
+            <h3>Support</h3>
+        </div>
+        <ul class="sidebar-nav">
+            <li><a href="/help-center"><i class="fas fa-question-circle"></i> Help Center</a></li>
+            <li><a href="/contact"><i class="fas fa-envelope"></i> Contact Us</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div class="dashboard-header">
+            <h1>Dashboard</h1>
+            <button class="btn">
+                <i class="fas fa-plus"></i>
+                <span>New Interview</span>
+            </button>
+        </div>
+
+        <div class="dashboard-cards">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Total Interviews</div>
+                    <div class="card-icon">
+                        <i class="fas fa-video"></i>
+                    </div>
+                </div>
+                <div class="card-value">24</div>
+                <div class="card-change card-change-positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>12% from last month</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Completed</div>
+                    <div class="card-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                </div>
+                <div class="card-value">18</div>
+                <div class="card-change card-change-positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>8% from last month</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Pending</div>
+                    <div class="card-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+                <div class="card-value">6</div>
+                <div class="card-change card-change-negative">
+                    <i class="fas fa-arrow-down"></i>
+                    <span>4% from last month</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Average Rating</div>
+                    <div class="card-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+                <div class="card-value">4.2</div>
+                <div class="card-change card-change-positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>0.5 from last month</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="interviews-section">
+            <div class="section-header">
+                <h2>Recent Interviews</h2>
+                <a href="/interviews" class="btn btn-outline">
+                    <span>View All</span>
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <table class="interviews-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Position</th>
+                        <th>Company</th>
+                        <th>Duration</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>July 15, 2023</td>
+                        <td>Frontend Developer</td>
+                        <td>Tech Corp</td>
+                        <td>45 min</td>
+                        <td><span class="status-badge status-completed">Completed</span></td>
+                        <td>
+                            <a href="/interview/1" class="btn btn-outline">
+                                <span class="btn-icon"><i class="fas fa-eye"></i></span>
+                                <span>View</span>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>July 10, 2023</td>
+                        <td>Software Engineer</td>
+                        <td>Innovate Inc</td>
+                        <td>60 min</td>
+                        <td><span class="status-badge status-completed">Completed</span></td>
+                        <td>
+                            <a href="/interview/2" class="btn btn-outline">
+                                <span class="btn-icon"><i class="fas fa-eye"></i></span>
+                                <span>View</span>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>July 5, 2023</td>
+                        <td>UI/UX Designer</td>
+                        <td>Creative Solutions</td>
+                        <td>30 min</td>
+                        <td><span class="status-badge status-pending">Pending</span></td>
+                        <td>
+                            <a href="/interview/3" class="btn btn-outline">
+                                <span class="btn-icon"><i class="fas fa-eye"></i></span>
+                                <span>View</span>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>June 28, 2023</td>
+                        <td>Data Analyst</td>
+                        <td>Data Systems</td>
+                        <td>40 min</td>
+                        <td><span class="status-badge status-scheduled">Scheduled</span></td>
+                        <td>
+                            <a href="/interview/4" class="btn btn-outline">
+                                <span class="btn-icon"><i class="fas fa-eye"></i></span>
+                                <span>View</span>
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Profile dropdown toggle
+        document.getElementById('profileIcon').addEventListener('click', function() {
+            document.getElementById('dropdownContent').classList.toggle('show');
+        });
+
+        // Close the dropdown if clicked outside
+        window.addEventListener('click', function(event) {
+            if (!event.target.matches('.profile-icon') && !event.target.matches('.profile-icon i')) {
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+        });
+
+        // Mobile menu toggle
+        document.querySelector('.menu-toggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('active');
+        });
+    </script>
+{% endblock %}

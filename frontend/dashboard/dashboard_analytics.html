@@ -1,0 +1,217 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% block title %}Interview Analytics{% endblock %}
+{% block extracss %}
+<style>
+    /* Reuse your existing CSS for cards, tables, and buttons */
+    .analytics-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    .analytics-header h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--text-color);
+    }
+    .card {
+        border: none;
+        border-radius: 0.75rem;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+    }
+    .card-body {
+        padding: 1.5rem;
+    }
+    .chart-container {
+        position: relative;
+        height: 300px;
+        width: 100%;
+    }
+    .status-badge {
+        padding: 0.3rem 0.6rem;
+        border-radius: 0.75rem;
+        font-size: 0.8rem;
+        font-weight: 500;
+        text-align: center;
+        width: 90px;
+    }
+    .status-completed {
+        color: #059669;
+        background-color: rgba(5, 150, 105, 0.1);
+    }
+    .status-pending {
+        color: #d97706;
+        background-color: rgba(217, 119, 6, 0.1);
+    }
+    .status-scheduled {
+        color: #0369a1;
+        background-color: rgba(3, 105, 161, 0.1);
+    }
+    @media (max-width: 640px) {
+        .analytics-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+{% block inner_content %}
+<div class="analytics-header">
+    <h1>Interview Analytics</h1>
+</div>
+
+<!-- Summary Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5 class="card-title fw-semibold">Total Interviews</h5>
+                <h2 class="text-primary fw-bold">{{ total_interviews }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5 class="card-title fw-semibold">Completed</h5>
+                <h2 class="text-success fw-bold">{{ completed_interviews }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5 class="card-title fw-semibold">Scheduled</h5>
+                <h2 class="text-warning fw-bold">{{ scheduled_interviews }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Section -->
+<div class="row g-4 mb-4">
+    <!-- Status Distribution (Pie Chart) -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title fw-semibold mb-4">Interview Status Distribution</h5>
+                <div class="chart-container">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Trends (Bar Chart) -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title fw-semibold mb-4">Monthly Interview Trends</h5>
+                <div class="chart-container">
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Completion Rate (Line Chart) -->
+<div class="row g-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title fw-semibold mb-4">Completion Rate Over Time</h5>
+                <div class="chart-container" style="height: 250px;">
+                    <canvas id="completionChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Interviews Table -->
+<div class="card mt-4">
+    <div class="card-body">
+        <h5 class="card-title fw-semibold mb-4">Recent Interviews</h5>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Duration</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for interview in recent_interviews %}
+                <tr>
+                    <td>{{ interview.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+                    <td>{{ interview.title }}</td>
+                    <td><span class="status-badge status-{{ interview.status|lower }}">{{ interview.status }}</span></td>
+                    <td>{{ interview.duration }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const statusData = {
+        labels: ['Completed', 'Scheduled', 'Pending'],
+        datasets: [{
+            data: [{{ completed_interviews }}, {{ scheduled_interviews }}, {{ pending_interviews }}],
+            backgroundColor: ['#059669', '#0369a1', '#d97706'],
+            borderWidth: 1
+        }]
+    };
+
+    const monthlyData = {
+        labels: {{ months_labels | tojson }},
+        datasets: [{
+            label: 'Interviews',
+            data: {{ monthly_data | tojson }},
+            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+            borderColor: 'rgba(37, 99, 235, 1)',
+            borderWidth: 1
+        }]
+    };
+
+    const completionData = {
+        labels: {{ week_labels | tojson }},
+        datasets: [{
+            label: 'Completion Rate (%)',
+            data: {{ completion_data | tojson }},
+            backgroundColor: 'rgba(5, 150, 105, 0.1)',
+            borderColor: 'rgba(5, 150, 105, 1)',
+            borderWidth: 1,
+            tension: 0.3
+        }]
+    };
+
+    // Initialize Charts
+    document.addEventListener('DOMContentLoaded', function() {
+        new Chart(document.getElementById('statusChart'), {
+            type: 'pie',
+            data: statusData,
+            options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+        });
+
+        new Chart(document.getElementById('monthlyChart'), {
+            type: 'bar',
+            data: monthlyData,
+            options: { responsive: true, scales: { y: { beginAtZero: true } } }
+        });
+
+        new Chart(document.getElementById('completionChart'), {
+            type: 'line',
+            data: completionData,
+            options: { responsive: true, scales: { y: { beginAtZero: true } } }
+        });
+    });
+</script>
+{% endblock %}

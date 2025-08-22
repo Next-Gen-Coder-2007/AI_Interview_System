@@ -1,0 +1,38 @@
+{% extends "dashboard/dashboard_base.html" %}
+
+{% block title %}Create Interview{% endblock %}
+
+{% block inner_content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Create New Interview</h2>
+    <form method="POST">
+        <div class="mb-3">
+            <label for="title" class="form-label">Interview Title</label>
+            <input type="text" class="form-control" id="title" name="title" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="domain" class="form-label">Domain / Field</label>
+            <input type="text" class="form-control" id="domain" name="domain" required>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="date" class="form-label">Date</label>
+                <input type="text" class="form-control" id="date" name="date" value="{{ date_today }}" readonly>
+            </div>
+            <div class="col-md-6">
+                <label for="duration" class="form-label">Duration (Minutes)</label>
+                <input type="number" class="form-control" id="duration" name="duration" min="1" max="60" required>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="description" class="form-label">Interview Description</label>
+            <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Create Interview</button>
+    </form>
+</div>
+{% endblock %}

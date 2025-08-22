@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Based Real-Time Interview System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary-color: #1e40af;
+            --accent-color: #3b82f6;
+            --text-color: #1f2937;
+            --text-light: #6b7280;
+            --background: #f9fafb;
+            --white: #ffffff;
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background);
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            width: 100%;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--white);
+            color: var(--text-color);
+            padding: 1rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            font-size: 1.8rem;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            padding: 0.5rem 0;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary-color);
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Auth Buttons */
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 0.5rem 1.25rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            transition: var(--transition);
+            border: 1px solid transparent;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .btn-outline {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            background-color: transparent;
+        }
+
+        .btn-learn{
+            border-color: white;
+            color: white;
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(37, 99, 235, 0.1);
+        }
+
+        .btn-learn:hover{
+            background-color: rgba(0, 0, 207, 0.362);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: var(--white);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.9) 0%, rgba(30, 64, 175, 0.9) 100%);
+            color: var(--white);
+            padding: 150px 0 100px;
+            text-align: center;
+        }
+
+        .hero-content {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        /* Section Styles */
+        .section {
+            padding: 5rem 0;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .section-header h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 1rem;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        .section-header h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            border-radius: 3px;
+        }
+
+        .section-header p {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            line-height: 1.8;
+        }
+
+        /* Card Styles */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .card {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            color: var(--white);
+            font-size: 1.5rem;
+        }
+
+        .card h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card p {
+            color: var(--text-light);
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin-top: auto;
+        }
+
+        .feature-list li {
+            color: var(--text-light);
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+            padding-left: 1.25rem;
+            position: relative;
+        }
+
+        .feature-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        /* Step Styles */
+        .step-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .step {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: var(--shadow);
+            text-align: center;
+            position: relative;
+            transition: var(--transition);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .step:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .step-number {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin: 0 auto 1.5rem;
+        }
+
+        .step h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+
+        .step p {
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        /* Benefit Styles */
+        .benefit-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .benefit {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: var(--white);
+            border-radius: 0.75rem;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .benefit:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .benefit-icon {
+            width: 150px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 1.2rem;
+        }
+
+        .benefit-content h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+
+        .benefit-content p {
+            color: var(--text-light);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* Technology Stack */
+        .tech-stack {
+            padding: 5rem 0;
+            background: linear-gradient(135deg, #f3f4f6 0%, #f9fafb 100%);
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .tech-category {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .tech-category:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .tech-category h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        .tech-category h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 30px;
+            height: 2px;
+            background-color: var(--primary-color);
+        }
+
+        .tech-category p {
+            color: var(--text-light);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .tech-highlight {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        footer {
+            background: var(--text-color);
+            color: var(--white);
+            padding: 4rem 0 2rem;
+        }
+
+        .footer-content {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .footer-content h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .footer-content p {
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 2rem;
+            margin-top: 2rem;
+            color: rgba(255, 255, 255, 0.6);
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .card-grid, .step-grid, .benefit-grid, .tech-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-header h2 {
+                font-size: 1.8rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .hero {
+                padding: 120px 0 80px;
+            }
+
+
+            .btn {
+                width: 100%;
+                max-width: 300px;
+                margin-bottom: 0.5rem;
+            }
+
+            .auth-buttons a{
+                margin: 0;
+            }
+
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-4 {
+            margin-top: 1rem;
+        }
+
+        .mt-6 {
+            margin-top: 1.5rem;
+        }
+
+        .mb-4 {
+            margin-bottom: 1rem;
+        }
+
+        .mb-6 {
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <a href="/" class="logo">
+                    <i class="fas fa-robot logo-icon"></i>
+                    <span>AI Interview Pro</span>
+                </a>
+                <div class="auth-buttons">
+                    <a href="/login" class="btn btn-outline">Login</a>
+                    <a href="/register" class="btn btn-primary">Register</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>AI-Powered Interview Automation Platform</h1>
+                <p>Transform your hiring process with our intelligent interview system that combines advanced AI technologies to deliver objective, efficient, and insightful candidate evaluations.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="overview">
+        <div class="container">
+            <div class="section-header">
+                <h2>Platform Overview</h2>
+                <p>Our AI-based interview system revolutionizes the traditional hiring process by automating interviews with advanced technologies that ensure objectivity, efficiency, and deep insights into candidate capabilities.</p>
+            </div>
+
+            <div class="card-grid">
+                <div class="card">
+                    <div class="card-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h3><i class="fas fa-bullseye"></i> AI-Driven Automation</h3>
+                    <p>Completely automate the interview process from question generation to candidate evaluation, significantly reducing time-to-hire and manual effort.</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                    <h3><i class="fas fa-bullseye"></i> Customizable Interview Flows</h3>
+                    <p>Create tailored interview experiences for different job roles, seniority levels, and domains with our flexible configuration system.</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <h3><i class="fas fa-chart-line"></i> Data-Driven Insights</h3>
+                    <p>Gain comprehensive analytics on candidate performance with AI-generated scores, sentiment analysis, and behavioral assessments.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="features">
+        <div class="container">
+            <div class="section-header">
+                <h2>Advanced Features</h2>
+                <p>Our platform integrates multiple cutting-edge technologies to deliver a comprehensive interview solution that goes beyond traditional methods.</p>
+            </div>
+
+            <div class="card-grid">
+                <div class="card">
+                    <div class="card-icon">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
+                    <h3>Adaptive Interview Flow</h3>
+                    <p>Our AI dynamically adjusts questions based on candidate responses, creating a personalized interview experience for each individual.</p>
+                    <ul class="feature-list">
+                        <li>Real-time difficulty adjustment</li>
+                        <li>Context-aware follow-up questions</li>
+                        <li>Personalized interview paths</li>
+                        <li>Domain-specific question targeting</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h3>Multimodal Interaction</h3>
+                    <p>Engage candidates through multiple channels with seamless integration of voice, video, and text inputs for comprehensive evaluation.</p>
+                    <ul class="feature-list">
+                        <li>Real-time speech-to-text conversion</li>
+                        <li>High-definition video capture</li>
+                        <li>Text-based response options</li>
+                        <li>Automatic language detection</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">
+                        <i class="fas fa-smile"></i>
+                    </div>
+                    <h3>Behavioral Analysis</h3>
+                    <p>Advanced computer vision algorithms analyze facial expressions, body language, and vocal patterns to assess candidate soft skills.</p>
+                    <ul class="feature-list">
+                        <li>Emotion recognition</li>
+                        <li>Confidence level assessment</li>
+                        <li>Stress detection</li>
+                        <li>Engagement measurement</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">
+                        <i class="fas fa-clipboard-check"></i>
+                    </div>
+                    <h3>Comprehensive Evaluation</h3>
+                    <p>Our AI evaluates candidates on multiple dimensions including technical skills, problem-solving abilities, communication, and cultural fit.</p>
+                    <ul class="feature-list">
+                        <li>Technical accuracy scoring</li>
+                        <li>Language proficiency assessment</li>
+                        <li>Logical reasoning evaluation</li>
+                        <li>Cultural fit analysis</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Enterprise-Grade Security</h3>
+                    <p>Protect sensitive candidate data with our robust security measures and compliance with global data protection regulations.</p>
+                    <ul class="feature-list">
+                        <li>End-to-end encryption</li>
+                        <li>GDPR compliance</li>
+                        <li>Secure data storage</li>
+                        <li>Role-based access control</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Advanced Analytics</h3>
+                    <p>Gain actionable insights from comprehensive interview data with our powerful analytics dashboard and reporting tools.</p>
+                    <ul class="feature-list">
+                        <li>Candidate comparison tools</li>
+                        <li>Performance trend analysis</li>
+                        <li>Custom report generation</li>
+                        <li>Data export capabilities</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="tech-stack" id="technology">
+        <div class="container">
+            <div class="section-header">
+                <h2>Technology Architecture</h2>
+                <p>Built on a modern tech stack that combines the latest advancements in AI with robust, scalable infrastructure to deliver enterprise-grade performance.</p>
+            </div>
+
+            <div class="tech-grid">
+                <div class="tech-category">
+                    <div class="card-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3>AI & Machine Learning</h3>
+                    <p>Our platform leverages state-of-the-art AI models including <span class="tech-highlight">OpenAI GPT</span> for natural language processing and <span class="tech-highlight">custom-trained CNNs</span> for computer vision tasks, all optimized for real-time performance.</p>
+                </div>
+
+                <div class="tech-category">
+                    <div class="card-icon">
+                        <i class="fas fa-server"></i>
+                    </div>
+                    <h3>Backend Infrastructure</h3>
+                    <p>Built on <span class="tech-highlight">Flask</span> with <span class="tech-highlight">PostgreSQL</span> for data management, our backend ensures high availability and scalability with containerized deployment using <span class="tech-highlight">Docker</span> and <span class="tech-highlight">Kubernetes</span>.</p>
+                </div>
+
+                <div class="tech-category">
+                    <div class="card-icon">
+                        <i class="fas fa-laptop-code"></i>
+                    </div>
+                    <h3>Frontend Framework</h3>
+                    <p>Our responsive frontend is developed with <span class="tech-highlight">HTML, CSS</span> and <span class="tech-highlight">Javascript</span>, utilizing modern UI libraries to create an intuitive, user-friendly interface that works across all devices.</p>
+                </div>
+
+                <div class="tech-category">
+                    <div class="card-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3>Real-time Processing</h3>
+                    <p>We implement <span class="tech-highlight">WebRTC</span> for real-time audio/video streaming and <span class="tech-highlight">WebSockets</span> for instantaneous data transmission, enabling seamless interview experiences without latency.</p>
+                </div>
+
+                <div class="tech-category">
+                    <div class="card-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <h3>Data Security</h3>
+                    <p>Our security infrastructure includes <span class="tech-highlight">end-to-end encryption</span>, <span class="tech-highlight">OAuth 2.0</span> authentication, and regular security audits to ensure compliance with <span class="tech-highlight">GDPR</span> and other data protection regulations.</p>
+                </div>
+
+                <div class="tech-category">
+                    <div class="card-icon">
+                        <i class="fas fa-cloud"></i>
+                    </div>
+                    <h3>Cloud Infrastructure</h3>
+                    <p>Deployed on <span class="tech-highlight">AWS</span> with auto-scaling capabilities, our cloud infrastructure ensures 99.9% uptime and can handle thousands of concurrent interviews with ease.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="workflow">
+        <div class="container">
+            <div class="section-header">
+                <h2>Implementation Workflow</h2>
+                <p>From initial setup to comprehensive candidate evaluation, our system guides you through every step of the interview process with intelligent automation.</p>
+            </div>
+
+            <div class="step-grid">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>System Configuration</h3>
+                    <p>Set up your organization's account, define user roles, and configure system settings including interview templates, evaluation criteria, and integration options.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Interview Design</h3>
+                    <p>Create customized interview flows by selecting question types, setting difficulty levels, and defining scoring rubrics tailored to specific job roles and requirements.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Candidate Invitation</h3>
+                    <p>Invite candidates through our integrated email system or API connections with your ATS, providing them with unique interview links and preparation instructions.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h3>Interview Execution</h3>
+                    <p>Candidates complete the interview through our secure platform, with all interactions recorded and analyzed in real-time by our AI evaluation engine.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <h3>Results Analysis</h3>
+                    <p>Review comprehensive candidate reports featuring scores, transcripts, video recordings, and AI-generated insights to make data-driven hiring decisions.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">6</div>
+                    <h3>Continuous Improvement</h3>
+                    <p>Leverage our analytics dashboard to identify trends, refine your interview processes, and continuously improve your hiring outcomes over time.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="benefits">
+        <div class="container">
+            <div class="section-header">
+                <h2>Strategic Advantages</h2>
+                <p>Our AI interview system delivers transformative benefits that enhance every aspect of your hiring process while reducing costs and improving outcomes.</p>
+            </div>
+
+            <div class="benefit-grid">
+                <div class="benefit">
+                    <div class="benefit-icon">
+                        <i class="fas fa-stopwatch"></i>
+                    </div>
+                    <div class="benefit-content">
+                        <h4>70% Faster Hiring</h4>
+                        <p>Reduce your time-to-hire by automating interview scheduling, execution, and evaluation, allowing you to make offers to top candidates before competitors.</p>
+                    </div>
+                </div>
+
+                <div class="benefit">
+                    <div class="benefit-icon">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <div class="benefit-content">
+                        <h4>60% Cost Reduction</h4>
+                        <p>Eliminate expenses associated with manual interviews including recruiter time, travel costs, and lost productivity from employee interview panels.</p>
+                    </div>
+                </div>
+
+                <div class="benefit">
+                    <div class="benefit-icon">
+                        <i class="fas fa-bullseye"></i>
+                    </div>
+                    <div class="benefit-content">
+                        <h4>Improved Quality of Hire</h4>
+                        <p>Our AI evaluates candidates more comprehensively than human interviewers, identifying top performers who might be overlooked in traditional processes.</p>
+                    </div>
+                </div>
+
+                <div class="benefit">
+                    <div class="benefit-icon">
+                        <i class="fas fa-balance-scale"></i>
+                    </div>
+                    <div class="benefit-content">
+                        <h4>Reduced Hiring Bias</h4>
+                        <p>Standardized evaluation criteria and blind review options help eliminate unconscious bias, promoting diversity and fair hiring practices.</p>
+                    </div>
+                </div>
+
+                <div class="benefit">
+                    <div class="benefit-icon">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <div class="benefit-content">
+                        <h4>Data-Driven Decisions</h4>
+                        <p>Comprehensive analytics and predictive hiring insights enable you to make objective decisions based on actual candidate performance data.</p>
+                    </div>
+                </div>
+
+                <div class="benefit">
+                    <div class="benefit-icon">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <div class="benefit-content">
+                        <h4>Global Scalability</h4>
+                        <p>Conduct interviews in multiple languages and time zones simultaneously, allowing you to efficiently evaluate candidates from around the world.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <h3>AI Interview Pro</h3>
+                <p>Revolutionizing the hiring process with artificial intelligence. Our platform combines advanced NLP, computer vision, and machine learning to deliver objective, efficient, and insightful candidate evaluations at scale.</p>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 AI Interview Pro. All rights reserved. | Privacy Policy | Terms of Service</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

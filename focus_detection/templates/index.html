@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Live Eye & Gaze Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f4f6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 30px;
+        }
+        video {
+            border: 2px solid #4f46e5;
+            border-radius: 8px;
+        }
+        #status {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+        .watching {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        .away {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        .eyes_closed {
+            background-color: #fef9c3;
+            color: #92400e;
+        }
+    </style>
+</head>
+<body>
+    <h1>Real-Time Eye & Gaze Tracker</h1>
+    <video id="video" autoplay playsinline width="320" height="240"></video>
+    <div id="status" class="watching">Initializing...</div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

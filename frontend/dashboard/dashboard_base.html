@@ -1,0 +1,361 @@
+{% extends "base.html" %}
+
+{% block styles %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root {
+        --primary-color: #2563eb;
+        --primary-dark: #1d4ed8;
+        --secondary-color: #1e40af;
+        --accent-color: #3b82f6;
+        --text-color: #1f2937;
+        --text-light: #6b7280;
+        --background: #f9fafb;
+        --white: #ffffff;
+        --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        line-height: 1.6;
+        color: var(--text-color);
+        background-color: var(--background);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+        width: 100%;
+    }
+
+    /* Header */
+    header {
+        background-color: var(--white);
+        color: var(--text-color);
+        padding: 1rem 0;
+        position: fixed;
+        width: 100%;
+        top: 0;
+        z-index: 1000;
+        box-shadow: var(--shadow);
+        transition: var(--transition);
+    }
+
+    nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .logo {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+    }
+
+    .logo-icon {
+        font-size: 1.8rem;
+    }
+
+    .menu-toggle {
+        display: none;
+        cursor: pointer;
+        font-size: 1.5rem;
+    }
+
+    /* Profile Dropdown */
+    .profile-dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+    .profile-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: var(--primary-color);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 1.2rem;
+        border: 2px solid transparent;
+        transition: var(--transition);
+    }
+
+    .profile-icon:hover {
+        background-color: var(--primary-dark);
+    }
+
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        right: 0;
+        background-color: var(--white);
+        min-width: 220px;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        border-radius: 0.5rem;
+        z-index: 1000;
+        overflow: hidden;
+        margin-top: 0.5rem;
+        opacity: 0;
+        transform: translateY(-10px);
+        transition: var(--transition);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .dropdown-content.show {
+        display: block;
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .dropdown-content a {
+        color: var(--text-color);
+        padding: 0.75rem 1rem;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        transition: var(--transition);
+        font-size: 0.95rem;
+    }
+
+    .dropdown-content a i {
+        margin-right: 0.75rem;
+        width: 18px;
+        text-align: center;
+    }
+
+    .dropdown-content a:hover {
+        background-color: rgba(37, 99, 235, 0.1);
+        color: var(--primary-color);
+    }
+
+    .dropdown-divider {
+        height: 1px;
+        background-color: rgba(0, 0, 0, 0.05);
+        margin: 0.5rem 0;
+    }
+
+    /* Sidebar */
+    .sidebar {
+        position: fixed;
+        top: 70px;
+        left: 0;
+        width: 260px;
+        height: calc(100vh - 70px);
+        background-color: var(--white);
+        padding: 1.5rem 0;
+        box-shadow: var(--shadow);
+        z-index: 999;
+        transition: var(--transition);
+        overflow-y: auto;
+        border-right: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .sidebar-nav {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .sidebar-nav li a {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1.5rem;
+        color: var(--text-light);
+        text-decoration: none;
+        transition: var(--transition);
+        font-weight: 500;
+        font-size: 0.95rem;
+    }
+
+    .sidebar-nav li a:hover {
+        color: var(--primary-color);
+        background-color: rgba(37, 99, 235, 0.05);
+    }
+
+    .sidebar-nav li a.active {
+        color: var(--primary-color);
+        background-color: rgba(37, 99, 235, 0.1);
+        border-left: 3px solid var(--primary-color);
+    }
+
+    .sidebar-nav li a i {
+        margin-right: 0.75rem;
+        font-size: 1.1rem;
+        width: 20px;
+        text-align: center;
+    }
+
+    .sidebar-header {
+        padding: 0 1.5rem 1rem 1.5rem;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .sidebar-header h3 {
+        font-size: 1rem;
+        color: var(--text-light);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Main Content */
+    .main-content {
+        margin-left: 260px;
+        margin-top: 70px;
+        padding: 2rem;
+        flex: 1;
+        transition: var(--transition);
+    }
+
+    @media (max-width: 768px) {
+        .sidebar {
+            width: 220px;
+        }
+
+        .main-content {
+            margin-left: 220px;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .menu-toggle {
+            display: block;
+        }
+
+        .sidebar {
+            transform: translateX(-100%);
+            position: fixed;
+        }
+
+        .sidebar.active {
+            transform: translateX(0);
+        }
+
+        .main-content {
+            margin-left: 0;
+            padding: 1.5rem;
+        }
+
+        .container {
+            padding: 0 10px;
+        }
+    }
+</style>
+{% block extracss %}{% endblock %}
+{% endblock %}
+{% block content %}
+<header>
+    <div class="container">
+        <nav>
+            <div style="display: flex; align-items: center; gap: 1.5rem;">
+                <div class="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </div>
+                <a href="/dashboard" class="logo">
+                    <i class="fas fa-robot logo-icon"></i>
+                    <span>AI Interview Pro</span>
+                </a>
+            </div>
+            <div class="profile-dropdown">
+                {% if user.profile_picture %}
+                    <img 
+                        src="data:image/png;base64,{{ user.profile_picture }}" 
+                        alt="Profile Picture"
+                        id="profileTrigger" 
+                        class="rounded-circle" 
+                        width="40" 
+                        height="40" 
+                        style="object-fit: cover; border: 1px solid #ccc;cursor: pointer;transition: var(--transition);">
+                {% else %}
+                    <div class="profile-icon" id="profileTrigger">
+                        <i class="fas fa-user"></i>
+                    </div>
+                {% endif %}
+                <div class="dropdown-content" id="dropdownContent">
+                    <div style="padding: 0.75rem 1rem 0.5rem 1rem; border-bottom: 1px solid rgba(0, 0, 0, 0.05);">
+                        <div style="font-size: 0.9rem; font-weight: 500; color: var(--text-color); margin-bottom: 0.2rem;">{{ user.username }}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-light);">{{ user.email }}</div>
+                    </div>
+                    <a href="/interviews"><i class="fas fa-video"></i> My Interviews</a>
+                    <a href="/settings"><i class="fas fa-cog"></i> Settings</a>
+                    <div class="dropdown-divider"></div>
+                    <a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+        </nav>
+    </div>
+</header>
+
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <h3>Main Menu</h3>
+    </div>
+    <ul class="sidebar-nav">
+        <li><a href="/dashboard" class="{% if request.path == '/dashboard' %}active{% endif %}"><i class="fas fa-home"></i> Dashboard</a></li>
+        <li><a href="/interviews" class="{% if request.path == '/interviews' %}active{% endif %}"><i class="fas fa-video"></i> Interviews</a></li>
+        <li><a href="/analytics" class="{% if request.path == '/analytics' %}active{% endif %}"><i class="fas fa-chart-bar"></i> Analytics</a></li>
+    </ul>
+
+    <div class="sidebar-header" style="margin-top: 1.5rem;">
+        <h3>Support</h3>
+    </div>
+    <ul class="sidebar-nav">
+        <li><a href="/help-center" class="{% if request.path == '/help-center' %}active{% endif %}"><i class="fas fa-question-circle"></i> Help Center</a></li>
+        <li><a href="/contact" class="{% if request.path == '/contact' %}active{% endif %}"><i class="fas fa-envelope"></i> Contact Us</a></li>
+    </ul>
+</div>
+<div class="main-content">
+    {% block inner_content %}{% endblock %}
+</div>
+{% block extrajs %}{% endblock %}
+{% endblock %}
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const profileTrigger = document.getElementById('profileTrigger');
+        const dropdown = document.getElementById('dropdownContent');
+
+        if (profileTrigger && dropdown) {
+            profileTrigger.addEventListener('click', function (event) {
+                event.stopPropagation();
+                dropdown.classList.toggle('show');
+                console.log("hi")
+            });
+
+            window.addEventListener('click', function (event) {
+                if (!event.target.closest('.profile-dropdown')) {
+                    dropdown.classList.remove('show');
+                }
+            });
+        }
+
+        const menuToggle = document.querySelector('.menu-toggle');
+        const sidebar = document.getElementById('sidebar');
+        if (menuToggle && sidebar) {
+            menuToggle.addEventListener('click', function () {
+                sidebar.classList.toggle('active');
+            });
+        }
+    });
+</script>
+{% endblock %}

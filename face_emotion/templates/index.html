@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Real-time Emotion Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding-top: 50px;
+        }
+        #emotion {
+            font-size: 32px;
+            color: #2563eb;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        #video-container {
+            display: inline-block;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Emotion Detection</h1>
+    <div id="emotion">Detecting...</div>
+
+    <div id="video-container">
+        <img src="{{ url_for('video_feed') }}" width="640" height="480">
+    </div>
+
+    <script>
+        async function fetchEmotion() {
+            try {
+                const res = await fetch('/emotion');
+                const data = await res.json();
+                document.getElementById('emotion').textContent = "Emotion: " + data.emotion;
+            } catch (e) {
+                document.getElementById('emotion').textContent = "Error fetching emotion";
+            }
+        }
+
+        setInterval(fetchEmotion, 1000);
+        fetchEmotion();
+    </script>
+
+</body>
+</html>
