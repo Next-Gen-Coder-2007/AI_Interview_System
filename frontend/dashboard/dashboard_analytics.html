@@ -2,7 +2,6 @@
 {% block title %}Interview Analytics{% endblock %}
 {% block extracss %}
 <style>
-    /* Reuse your existing CSS for cards, tables, and buttons */
     .analytics-header {
         display: flex;
         justify-content: space-between;
@@ -63,7 +62,6 @@
     <h1>Interview Analytics</h1>
 </div>
 
-<!-- Summary Cards -->
 <div class="row g-4 mb-4">
     <div class="col-md-4">
         <div class="card">
@@ -84,16 +82,14 @@
     <div class="col-md-4">
         <div class="card">
             <div class="card-body text-center">
-                <h5 class="card-title fw-semibold">Scheduled</h5>
-                <h2 class="text-warning fw-bold">{{ scheduled_interviews }}</h2>
+                <h5 class="card-title fw-semibold">Pending</h5>
+                <h2 class="text-warning fw-bold">{{ pending_interviews }}</h2>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Charts Section -->
 <div class="row g-4 mb-4">
-    <!-- Status Distribution (Pie Chart) -->
     <div class="col-md-6">
         <div class="card">
             <div class="card-body">
@@ -105,7 +101,6 @@
         </div>
     </div>
 
-    <!-- Monthly Trends (Bar Chart) -->
     <div class="col-md-6">
         <div class="card">
             <div class="card-body">
@@ -118,7 +113,6 @@
     </div>
 </div>
 
-<!-- Completion Rate (Line Chart) -->
 <div class="row g-4">
     <div class="col-12">
         <div class="card">
@@ -132,7 +126,6 @@
     </div>
 </div>
 
-<!-- Recent Interviews Table -->
 <div class="card mt-4">
     <div class="card-body">
         <h5 class="card-title fw-semibold mb-4">Recent Interviews</h5>
@@ -193,7 +186,6 @@
         }]
     };
 
-    // Initialize Charts
     document.addEventListener('DOMContentLoaded', function() {
         new Chart(document.getElementById('statusChart'), {
             type: 'pie',

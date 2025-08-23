@@ -1,0 +1,190 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% block title %}View Interview{% endblock %}
+
+{% block extracss %}
+<style>
+    body {
+        background-color: #f8fafc; /* light blue-gray background */
+    }
+    .section-card {
+        background: #ffffff;
+        border-radius: 1rem;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid #e5e7eb;
+    }
+    .section-header {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #1e3a8a;
+        margin-bottom: 1rem;
+    }
+    .interviews-header h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #1e40af;
+    }
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        padding: 0.45rem 0.9rem;
+        transition: all 0.2s ease;
+    }
+    .btn-primary {
+        background-color: #2563eb;
+        border: none;
+    }
+    .btn-primary:hover {
+        background-color: #1d4ed8;
+    }
+    .btn-warning {
+        background-color: #3b82f6;
+        border: none;
+        color: white;
+    }
+    .btn-warning:hover {
+        background-color: #1d4ed8;
+    }
+    .btn-danger {
+        background-color: #ef4444;
+        border: none;
+    }
+    .btn-danger:hover {
+        background-color: #dc2626;
+    }
+    .resume-upload {
+        border: 2px dashed #93c5fd;
+        padding: 2rem;
+        text-align: center;
+        border-radius: 0.75rem;
+        background-color: #f9fafb;
+        transition: border-color 0.3s ease, background-color 0.3s ease;
+    }
+    .resume-upload:hover {
+        border-color: #2563eb;
+        background-color: #eff6ff;
+    }
+    .attempts-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .attempts-table th, .attempts-table td {
+        padding: 0.9rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    .attempts-table th {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #2563eb;
+        text-transform: uppercase;
+        background-color: #f1f5f9;
+    }
+    .attempts-table tbody tr:hover {
+        background-color: #f9fafb;
+    }
+    .btn-outline {
+        background: #fff;
+        border: 1px solid #2563eb;
+        color: #2563eb;
+        border-radius: 0.4rem;
+        padding: 0.3rem 0.7rem;
+        font-size: 0.85rem;
+        transition: all 0.2s ease;
+    }
+    .btn-outline:hover {
+        background: #2563eb;
+        color: #fff;
+    }
+</style>
+{% endblock %}
+
+{% block inner_content %}
+<div class="interviews-header d-flex justify-content-between align-items-center mb-4">
+    <h1>{{ interview.title }}</h1>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('take_interview', interview_id=interview.id) }}" class="btn btn-outline">
+            <span class="btn-icon"><i class="fas fa-play"></i></span>
+            <span>Take Interview</span>
+        </a>
+        <a href="{{ url_for('edit_interview', interview_id=interview.id) }}" class="btn btn-outline">
+            <span class="btn-icon"><i class="fas fa-edit"></i></span>
+            <span>Edit</span>
+        </a>
+        <form method="POST" action="{{ url_for('delete_interview', interview_id=interview.id) }}" style="display:inline-block;" onsubmit="return confirm('Are you sure you want to delete this interview?');">
+            <button type="submit" class="btn btn-outline">
+                <span class="btn-icon"><i class="fas fa-trash"></i></span>
+                <span>Delete</span>
+            </button>
+        </form>
+    </div>
+</div>
+
+
+<div class="section-card">
+    <div class="section-header">Interview Details</div>
+    <p><strong>Domain:</strong> {{ interview.domain }}</p>
+    <p><strong>Status:</strong> {{ interview.status }}</p>
+    <p><strong>Date:</strong> {{ interview.created_at.strftime('%B %d, %Y') }}</p>
+    <p><strong>Duration:</strong> {{ interview.duration }} mins</p>
+    <p><strong>Description:</strong> {{ interview.description }}</p>
+</div>
+
+<div class="section-card">
+    <div class="section-header">Resume</div>
+    {% if interview.resume_file %}
+        <p>Uploaded Resume: 
+            <a href="{{ url_for('download_resume', interview_id=interview.id) }}" target="_blank" class="text-blue-600">
+                {{ interview.resume_file }}
+            </a>
+        </p>
+    {% else %}
+        <p class="text-muted">No resume uploaded yet.</p>
+    {% endif %}
+    <form action="{{ url_for('upload_resume', interview_id=interview.id) }}" method="POST" enctype="multipart/form-data">
+        <div class="resume-upload">
+            <i class="fas fa-file-upload fa-2x mb-2 text-blue-500"></i>
+            <p>Click to upload or drag & drop your resume here</p>
+            <input type="file" name="resume" accept=".pdf,.doc,.docx" class="form-control mt-2" required>
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Upload Resume</button>
+    </form>
+</div>
+
+<div class="section-card">
+    <div class="section-header">Interview Attempts</div>
+    {% if attempts %}
+    <table class="attempts-table">
+        <thead>
+            <tr>
+                <th>S No.</th>
+                <th>Date</th>
+                <th>Score</th>
+                <th>Reasons</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for attempt in attempts %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ attempt.attempted_at.strftime('%B %d, %Y %H:%M') }}</td>
+                <td>{{ attempt.score }}%</td>
+                <td>{{ attempt.reasons or "N/A" }}</td>
+                <td>
+                    <a href="{{ url_for('view_attempt', attempt_id=attempt.id) }}" class="btn btn-outline btn-sm">
+                        <i class="fas fa-eye"></i> View
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p class="text-muted">No attempts yet. Take your first interview!</p>
+    {% endif %}
+</div>
+{% endblock %}

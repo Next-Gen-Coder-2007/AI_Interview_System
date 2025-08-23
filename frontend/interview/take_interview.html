@@ -1,0 +1,17 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% block title %}Take Interview{% endblock %}
+
+{% block inner_content %}
+<div class="section-card">
+    <h2>Interview: {{ interview.title }}</h2>
+    <p><strong>Domain:</strong> {{ interview.domain }}</p>
+    <p><strong>Duration:</strong> {{ interview.duration }} minutes</p>
+    <p>{{ interview.description }}</p>
+
+    <form method="POST">
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-play"></i> Start Interview
+        </button>
+    </form>
+</div>
+{% endblock %}

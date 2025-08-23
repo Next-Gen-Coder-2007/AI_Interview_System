@@ -1,12 +1,13 @@
-from flask import Flask, render_template, redirect, url_for, request, flash, session
+from flask import Flask, render_template, redirect, url_for, request, flash, session, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 import base64
 from sqlalchemy import func
 import io
 from PIL import Image
 from datetime import datetime, timedelta
-import json
+import os
 
 def compress_and_convert_to_base64(image):
     img = Image.open(image)
@@ -19,8 +20,10 @@ def compress_and_convert_to_base64(image):
 
 app = Flask(__name__, template_folder="../frontend")
 app.config['SECRET_KEY'] = '123456789'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///../database/db.sqlite3'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 db = SQLAlchemy(app)
 
@@ -39,6 +42,7 @@ class Interview(db.Model):
     status = db.Column(db.String(100))
     description = db.Column(db.Text)
     duration = db.Column(db.Text)
+    resume_file = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     user = db.relationship('User', backref='interviews')
     attempts = db.relationship('Attempt', backref='interview', lazy=True)
@@ -259,27 +263,21 @@ def analytics():
     user = User.query.get(session['user_id'])
     total_interviews = Interview.query.count()
     completed_interviews = Interview.query.filter_by(status='Completed').count()
-    scheduled_interviews = Interview.query.filter_by(status='Scheduled').count()
     pending_interviews = Interview.query.filter_by(status='Pending').count()
 
-    # Recent interviews (latest 5)
     recent_interviews = Interview.query.order_by(Interview.created_at.desc()).limit(5).all()
 
-    # Prepare data for monthly trends
     monthly_counts = (
         db.session.query(func.extract('month', Interview.created_at).label('month'), func.count(Interview.id))
         .group_by('month')
         .order_by('month')
         .all()
     )
-    # Fill in months 1-12 to avoid missing months
     months_labels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
     monthly_data = [0]*12
     for month, count in monthly_counts:
         monthly_data[int(month)-1] = count
 
-    # Completion rate over time (e.g., weekly in last month)
-    from datetime import timedelta
     today = datetime.utcnow()
     week_labels = []
     completion_data = []
@@ -296,7 +294,6 @@ def analytics():
         'dashboard/dashboard_analytics.html',
         total_interviews=total_interviews,
         completed_interviews=completed_interviews,
-        scheduled_interviews=scheduled_interviews,
         pending_interviews=pending_interviews,
         recent_interviews=recent_interviews,
         months_labels=months_labels,
@@ -334,15 +331,31 @@ def create_interview():
 
     return redirect(url_for('dashboard'))
 
-@app.route('/take_interview/<int:interview_id>')
-def take_interview(interview_id):
+@app.route("/interview/<int:interview_id>")
+def view_interview(interview_id):
     if 'user_id' not in session:
         return redirect(url_for('login'))
-
+    user = User.query.get(session['user_id'])
     interview = Interview.query.get_or_404(interview_id)
-    questions = json.loads(interview.questions)
+    attempts = Attempt.query.filter_by(interview_id=interview.id).all()
+    return render_template("interview/interview_view.html", interview=interview, attempts=attempts, user=user)
 
-    return render_template('dashboard/take_interview.html', interview=interview, questions=questions)
+@app.route("/interview/<int:interview_id>/upload_resume", methods=["POST"])
+def upload_resume(interview_id):
+    file = request.files["resume"]
+    if file:
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+        file.save(filepath)
+        interview = Interview.query.get_or_404(interview_id)
+        interview.resume_file = filename
+        db.session.commit()
+    return redirect(url_for("view_interview", interview_id=interview_id))
+
+@app.route("/interview/<int:interview_id>/download_resume")
+def download_resume(interview_id):
+    interview = Interview.query.get_or_404(interview_id)
+    return send_from_directory(app.config["UPLOAD_FOLDER"], interview.resume_file, as_attachment=True)
 
 @app.route('/delete_interview/<int:interview_id>', methods=['POST'])
 def delete_interview(interview_id):
@@ -351,6 +364,67 @@ def delete_interview(interview_id):
     db.session.commit()
     flash('Interview deleted successfully!', 'success')
     return redirect(url_for('dashboard'))
+
+@app.route("/interview/<int:interview_id>/take", methods=["GET", "POST"])
+def take_interview(interview_id):
+    if 'user_id' not in session:
+        flash("Please login first.", "warning")
+        return redirect(url_for("login"))
+    user = User.query.get(session['user_id'])
+
+    interview = Interview.query.get_or_404(interview_id)
+
+    if request.method == "POST":
+        new_attempt = Attempt(
+            interview_id=interview_id,
+            attempted_at=datetime.utcnow(),
+            score=0,
+            reasons=""
+        )
+        interview.status = "Completed"
+        db.session.add(new_attempt)
+        db.session.commit()
+
+        flash("Interview attempt started!", "success")
+        return redirect(url_for("view_attempt", attempt_id=new_attempt.id))
+    return render_template("interview/take_interview.html", interview=interview, user=user)
+
+@app.route("/interview/<int:interview_id>/edit", methods=["GET", "POST"])
+def edit_interview(interview_id):
+    if 'user_id' not in session:
+        flash("Please login first.", "warning")
+        return redirect(url_for("login"))
+    user = User.query.get(session['user_id'])
+
+    interview = Interview.query.get_or_404(interview_id)
+
+    if interview.user_id != session['user_id']:
+        flash("You are not allowed to edit this interview.", "danger")
+        return redirect(url_for("interviews"))
+
+    if request.method == "POST":
+        interview.title = request.form.get("title")
+        interview.domain = request.form.get("domain")
+        interview.duration = request.form.get("duration")
+        interview.description = request.form.get("description")
+
+        db.session.commit()
+        flash("Interview updated successfully!", "success")
+        return redirect(url_for("view_interview", interview_id=interview.id))
+
+    return render_template("interview/edit_interview.html", interview=interview, user=user)
+
+@app.route("/attempt/<int:attempt_id>")
+def view_attempt(attempt_id):
+    if 'user_id' not in session:
+        flash("Please login first.", "warning")
+        return redirect(url_for("login"))
+    user = User.query.get(session['user_id'])
+
+    attempt = Attempt.query.get_or_404(attempt_id)
+    interview = Interview.query.get_or_404(attempt.interview_id)
+
+    return render_template("interview/view_attempt.html", attempt=attempt, interview=interview, user = user)
 
 if __name__ == '__main__':
     app.run(debug=True)
